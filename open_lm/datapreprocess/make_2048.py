@@ -21,14 +21,21 @@ from transformers import GPTNeoXTokenizerFast
 
 QUEUE_MAX = 10_000
 BUFFER_MIN = 100_000
-BUFFER_MAX = 200_000
-CHUNK_SIZE = 2048 + 1
+BUFFER_MAX = 200_000 
+CHUNK_SIZE = 2048 + 1 # input text is chunked in this size. If not enough tokens, it will be added to the next chunk
 SHARD_SIZE = 8192
 SLEEP_TIME = 1
 
 S3_BASE = os.environ.get("S3_BASE")
 
-EOT_TOKEN = "<|endoftext|>"
+TOKENIZER = 'trishah/llama-2-7b-hf'
+
+eos_token_mapping ={
+    'EleutherAI/gpt-neox-20b': '<|endoftext|>',
+    'trishah/llama-2-7b-hf': '</s>', # vocab size 32000 
+}
+
+EOT_TOKEN = eos_token_mapping[TOKENIZER]
 
 
 # ================================================
@@ -183,7 +190,6 @@ def tokenize_eleutherai(tokenizer, string):
 def main(
     input_files,
     output_dir,
-    tokenizer="EleutherAI/gpt-neox-20b",
     num_workers=32,
     num_consumers=8,
     upload_to_s3=False,
@@ -198,7 +204,12 @@ def main(
 
     print("Input files", input_files)
 
-    enc = GPTNeoXTokenizerFast.from_pretrained("EleutherAI/gpt-neox-20b")
+    if 'gpt-neox' in TOKENIZER:
+        enc = GPTNeoXTokenizerFast.from_pretrained("EleutherAI/gpt-neox-20b")
+    elif 'llama' in TOKENIZER:
+        enc =LlamaTokenizerFast.from_pretrained("trishah/llama-2-7b-hf")
+    else:
+        raise ValueError(f"Unknown tokenizer {TOKENIZER}")
 
     tokenize = lambda x: tokenize_eleutherai(enc, x)
     buffer = []  # Use list instead of queue.Queue
@@ -238,7 +249,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-files", type=str, nargs="+")
     parser.add_argument("--output-dir", type=Path)
-    parser.add_argument("--tokenizer", type=str, default="EleutherAI/gpt-neox-20b")
     parser.add_argument("--num-workers", type=int, default=32)
     parser.add_argument("--num-consumers", type=int, default=8)
     parser.add_argument("--upload-to-s3", action="store_true")
@@ -248,7 +258,6 @@ if __name__ == "__main__":
     main(
         args.input_files,
         args.output_dir,
-        args.tokenizer,
         args.num_workers,
         args.num_consumers,
         args.upload_to_s3,
