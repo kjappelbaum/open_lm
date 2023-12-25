@@ -12,7 +12,7 @@ import zstandard as zstd
 from contextlib import contextmanager
 import argparse
 from pathlib import Path
-from transformers import GPTNeoXTokenizerFast
+from transformers import GPTNeoXTokenizerFast, LlamaTokenizerFast
 
 
 # ========================================
