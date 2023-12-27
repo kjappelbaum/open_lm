@@ -3,7 +3,6 @@
 #SBATCH --job-name=openlmtest
 #SBATCH --nodes 1
 #SBATCH --gpus 1
-#SBATCH --output=experiments/logs/%x_%j.out
 #SBATCH --account=chemnlp
 #SBATCH --open-mode=append
 #SBATCH --exclusive
@@ -50,7 +49,7 @@ srun --comment nextgends --cpu_bind=v --accel-bind=gn python -m open_lm.main \
     --train-data "pipe:aws s3 cp s3://llched-raw/open_lm_run{0..7}/shard_*.tar -" \
     --dataset-resampled \
     --precision amp_bfloat16 \
-    --batch-size $BATCHSIZE \
+    --global_batch_size $BATCHSIZE \
     --grad-checkpointing \
     --log-every-n-steps 20 \
     --grad-clip-norm 1 \
