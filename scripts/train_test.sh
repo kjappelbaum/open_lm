@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --gpus 1
 #SBATCH --output=experiments/logs/%x_%j.out
-#SBATCH --comment=chemnlp
+#SBATCH --account=chemnlp
 #SBATCH --open-mode=append
 #SBATCH --exclusive
 
