@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --partition=a40
+#SBATCH --partition=a40x
 #SBATCH --job-name=openlmtest
 #SBATCH --nodes 1
 #SBATCH --gpus 1
