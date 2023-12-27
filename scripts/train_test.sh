@@ -2,13 +2,16 @@
 #SBATCH --partition=a40
 #SBATCH --job-name=openlmtest
 #SBATCH --nodes 1
+#SBATCH --gpus 1
 #SBATCH --output=experiments/logs/%x_%j.out
 #SBATCH --comment=chemnlp
 #SBATCH --open-mode=append
 #SBATCH --exclusive
 
 module load openmpi
-module load cuda/11.8
+module load cuda/12.1
+
+conda activate openllm
 
 export MASTER_ADDR=$(hostname)
 export MASTER_PORT=12802
