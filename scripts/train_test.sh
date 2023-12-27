@@ -64,8 +64,8 @@ srun --comment nextgends --cpu_bind=v --accel-bind=gn python -m open_lm.main \
     --name $EXP_NAME \
     --logs /admin/home-kjablonk/openlm_test \
     --resume latest \
-    --fsdp \
-    --fsdp-limit-all-gathers \
-    --fsdp-amp \
     --data-key 'json' \
     --lr-cooldown-end 3e-5
+# --fsdp \
+# --fsdp-limit-all-gathers \
+# --fsdp-amp \
