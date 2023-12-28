@@ -10,6 +10,8 @@
 module load openmpi
 module load cuda/12.1
 
+
+source ~/miniconda3/bin/activate
 conda activate openllm
 
 export MASTER_ADDR=$(hostname)
@@ -44,9 +46,9 @@ echo "node-list: $SLURM_JOB_NODELIST"
 #  one epoch is --train-num-samples tokens
 
 srun --comment nextgends --cpu_bind=v --accel-bind=gn python -m open_lm.main \
-    --train-num-samples 25000000000 \
+    --train-num-samples 250000 \
     --workers 2 \
-    --train-data "pipe:aws s3 cp s3://llched-raw/open_lm_run{0..7}/shard_*.tar -" \
+    --train-data "pipe:aws s3 cp s3://llched-raw/open_lm_run{0..7}/shard-{0000000..0000050}.tar -" \
     --dataset-resampled \
     --precision amp_bfloat16 \
     --global-batch-size $BATCHSIZE \
@@ -62,9 +64,9 @@ srun --comment nextgends --cpu_bind=v --accel-bind=gn python -m open_lm.main \
     --report-to wandb \
     --wandb-project-name lm1 \
     --name $EXP_NAME \
-    --logs /admin/home-kjablonk/openlm_test \
+    --logs /weka/home-kjablonk/openlm_test \
     --resume latest \
-    --data-key 'json' \
+    --data-key 'txt' \
     --lr-cooldown-end 3e-5
 # --fsdp \
 # --fsdp-limit-all-gathers \
