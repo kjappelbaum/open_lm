@@ -1,4 +1,4 @@
-epoch: 1.25T
+epoch: 64
 dataset: bigdata
 num_params: 1B
 max_seq_len: 2048
@@ -8,7 +8,7 @@ precision: fp32
 # Tokenizer
 tokenizer:
   # name: [Add name from memory]
-  pretrained_model_name_or_path: 
+  pretrained_model_name_or_path: trishah/llama-2-7b-hf
   kwargs:
     model_max_length: 2048
 
@@ -22,10 +22,10 @@ load_path: # Add your (optional) Composer checkpoint path here!
 
 device_eval_batch_size: 8
 
-# FSDP config for model sharding
-fsdp_config:
-  sharding_strategy: FULL_SHARD
-  mixed_precision: FULL
+# # FSDP config for model sharding
+# fsdp_config:
+#   sharding_strategy: FULL_SHARD
+#   mixed_precision: FULL
 
 
 icl_tasks:
@@ -36,3 +36,18 @@ icl_tasks:
   icl_task_type: multiple_choice
   continuation_delimiter: 'Answer: ' # this separates questions from answers
   has_categories: true
+-
+  label: lambada_openai
+  dataset_uri: local_data/lambada_openai.jsonl
+  num_fewshot: [0]
+  icl_task_type: language_modeling  
+-
+  label: winogrande
+  dataset_uri: local_data/winogrande.jsonl
+  num_fewshot: [5]
+  icl_task_type: schema
+-
+  label: winograd
+  dataset_uri: local_datas/winograd_wsc.jsonl
+  num_fewshot: [3]
+  icl_task_type: schema
