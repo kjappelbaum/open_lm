@@ -15,7 +15,8 @@ def run_preprocessing_export(file):
 
 
 def run_preprocessing_export_all():
-    files = glob("/scratch/kjablonk/export/**/*.jsonl")
+    files = glob("/scratch/kjablonk/export/**/*.jsonl", recursive=True)
+    print(f"Found {len(files)} files")
     for file in files:
         print(file)
         run_preprocessing_export(file)
