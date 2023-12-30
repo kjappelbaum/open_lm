@@ -48,10 +48,10 @@ def write_to_shard(chunks, shard_writer):
         shard_writer.write({"__key__": f"{idx:012d}", "txt": str(chunk)})
 
 
-def upload_to_s3_and_remove(fname):
+def upload_to_s3_and_remove(fname, s3_base=S3_BASE):
     """Uploads file to s3 and removes it from local file system"""
     fname_split = fname.split("/")
-    s3_path = S3_BASE + "/"  + fname_split[-2] + "/" + fname_split[-1]
+    s3_path = s3_base + "/"  + fname_split[-2] + "/" + fname_split[-1]
     cmd = f"aws s3 cp {fname} {s3_path} && rm {fname}"
     print("COMMAND:", cmd)
     os.system(cmd)
@@ -131,7 +131,7 @@ def process_files(file_list, buffer, enc, buffer_lock):
                                 buffer.append(chunk)
 
 
-def consumer(my_id, output_dir, threads, buffer, buffer_lock, num_consumers, upload_to_s3=False):
+def consumer(my_id, output_dir, threads, buffer, buffer_lock, num_consumers, upload_to_s3=False, s3_base_dir=S3_BASE):
     output_directory = f"{output_dir}/{CHUNK_SIZE - 1}-v1/{my_id}"
     os.makedirs(output_directory, exist_ok=True)
     shard_writer = ShardWriter(os.path.join(output_directory, "shard-%07d.tar"), maxcount=SHARD_SIZE)
@@ -153,7 +153,7 @@ def consumer(my_id, output_dir, threads, buffer, buffer_lock, num_consumers, upl
             print(f"I am {my_id} and I am writing a shard.", len(buffer))
             write_to_shard(chunks, shard_writer)
             if upload_to_s3:
-                upload_to_s3_and_remove(shard_writer.fname)
+                upload_to_s3_and_remove(shard_writer.fname, s3_base_dir=s3_base_dir)
             # print("FNAME", shard_writer.fname)
             chunks = []
             time_for_shard = time.time() - start_time
@@ -174,7 +174,7 @@ def consumer(my_id, output_dir, threads, buffer, buffer_lock, num_consumers, upl
 
         write_to_shard(chunks, shard_writer)
         if upload_to_s3:
-            upload_to_s3_and_remove(shard_writer.fname)
+            upload_to_s3_and_remove(shard_writer.fname, s3_base_dir=s3_base_dir)
         chunks = []
 
 
@@ -193,9 +193,9 @@ def main(
     num_workers=32,
     num_consumers=8,
     upload_to_s3=False,
+    s3_base_dir=S3_BASE
 ):
     os.makedirs(f"{output_dir}/tars-{CHUNK_SIZE - 1}-v1", exist_ok=True)
-
     input_files = [glob.glob(input_file) for input_file in input_files]
     input_files = [x for y in input_files for x in y]
 
@@ -239,6 +239,7 @@ def main(
                 buffer_lock,
                 num_consumers,
                 upload_to_s3,
+                s3_base_dir,
             ),
         )
         t.start()
@@ -252,6 +253,7 @@ if __name__ == "__main__":
     parser.add_argument("--num-workers", type=int, default=32)
     parser.add_argument("--num-consumers", type=int, default=8)
     parser.add_argument("--upload-to-s3", action="store_true")
+    parser.add_argument("--s3-base-dir", type=str, default="s3://llched-raw/open_lm_run_processed_data/export/")
 
     args = parser.parse_args()
 
@@ -261,4 +263,5 @@ if __name__ == "__main__":
         args.num_workers,
         args.num_consumers,
         args.upload_to_s3,
+        args.s3_base_dir,
     )
