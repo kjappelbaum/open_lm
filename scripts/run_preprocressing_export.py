@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path 
 
 # new s3 base dir for every jsonl file 
-S3_BASE_BASE_DIR = "s3://llched-raw/open_lm_run_processed_data/export/"
+S3_BASE_BASE_DIR = "s3://llched-raw/open_lm_run_processed_data/export"
 
 
 def run_preprocessing_export(file):
