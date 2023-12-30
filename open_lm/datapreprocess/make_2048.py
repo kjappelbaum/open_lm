@@ -153,7 +153,7 @@ def consumer(my_id, output_dir, threads, buffer, buffer_lock, num_consumers, upl
             print(f"I am {my_id} and I am writing a shard.", len(buffer))
             write_to_shard(chunks, shard_writer)
             if upload_to_s3:
-                upload_to_s3_and_remove(shard_writer.fname, s3_base_dir=s3_base_dir)
+                upload_to_s3_and_remove(shard_writer.fname, s3_base=s3_base_dir)
             # print("FNAME", shard_writer.fname)
             chunks = []
             time_for_shard = time.time() - start_time
@@ -174,7 +174,7 @@ def consumer(my_id, output_dir, threads, buffer, buffer_lock, num_consumers, upl
 
         write_to_shard(chunks, shard_writer)
         if upload_to_s3:
-            upload_to_s3_and_remove(shard_writer.fname, s3_base_dir=s3_base_dir)
+            upload_to_s3_and_remove(shard_writer.fname, s3_base=s3_base_dir)
         chunks = []
 
 
