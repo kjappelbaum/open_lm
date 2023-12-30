@@ -22,4 +22,4 @@ def run_preprocessing_export_all():
         run_preprocessing_export(file)
 
 if __name__ == "__main__":
-    fire.Fire()
+    run_preprocessing_export_all()
