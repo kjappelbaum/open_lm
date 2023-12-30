@@ -1,6 +1,5 @@
 from glob import glob 
 import subprocess 
-import fire 
 from pathlib import Path 
 
 # new s3 base dir for every jsonl file 
