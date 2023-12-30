@@ -6,15 +6,22 @@ OpenLM is a minimal but performative language modeling (LM) repository, aimed to
 In contrast with other repositories such as Megatron, we depend only on PyTorch, XFormers, or Triton for our core modeling code.
 
 # Contents
+- [OpenLM](#openlm)
+- [Contents](#contents)
 - [Release Notes](#release-notes)
 - [Quickstart](#quickstart)
   - [Setup](#setup)
-  - [Process training data](#process-training-data)
-  - [Run training](#run-training)
+  - [Process Training Data](#process-training-data)
+  - [Run Training](#run-training)
+    - [Dataset manifest](#dataset-manifest)
   - [Evaluate Model](#evaluate-model)
   - [Generate Text](#generate-text)
 - [Pretrained Models](#pretrained-models)
-- [Team and Acknowledgements](#team-and-acknowledgements)
+  - [OpenLM 1B](#openlm-1b)
+  - [OpenLM 7B](#openlm-7b)
+- [Unit tests](#unit-tests)
+- [Team and acknowledgements](#team-and-acknowledgements)
+  - [Citation](#citation)
 
 # Release Notes
 - 09/26/23: Public release and featured on [Laion Blog](https://laion.ai/blog/open-lm/)
@@ -109,7 +116,7 @@ During training, the above command will pick shards to train on via sampling wit
 ```
 python -m open_lm.utils.make_wds_manifest --data-dir /preproc_data/
 ```
-This will create a file called ```manifest.jsonl``` under ```/preproc_data```. Training can then be done by sampling wihout replacement via the following example commands:
+This will create a file called ```manifest.jsonl``` under ```/preproc_data```. Training can then be done by sampling without replacement via the following example commands:
 ```
 >>> export CUDA_VISIBLE_DEVICES=0,1,2,3
 >>> torchrun --nproc-per-node 4 -m open_lm.main   \

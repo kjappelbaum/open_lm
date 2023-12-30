@@ -45,7 +45,7 @@ echo "node-list: $SLURM_JOB_NODELIST"
 srun --comment nextgends --cpu_bind=v --accel-bind=gn python -m open_lm.main \
     --train-num-samples 25000000000 \
     --workers 2 \
-    --train-data "pipe:aws s3 cp s3://s-laion/rpj_tokenized_upsampled_eleutherai/shard_{00000000..00099999}.tar -" "pipe:aws s3 cp s3://s-laion/2T_no_rpj_tokenized_upsampled_25k_shards/shard_{00000000..00024999}.tar -" \
+    --train-data "pipe:aws s3 cp s3://s-laion/rpj_tokenized_upsampled_eleutherai/shard_{00000000..00099100}.tar -" "pipe:aws s3 cp s3://s-laion/2T_no_rpj_tokenized_upsampled_25k_shards/shard_{00000000..00024999}.tar -" \
     --train-data-mix-weights 0.725 0.275 \
     --dataset-resampled \
     --precision amp_bfloat16 \

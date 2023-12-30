@@ -7,8 +7,9 @@ S3_BASE_BASE_DIR = "s3://llched-raw/open_lm_run_processed_data/export/"
 
 
 def run_preprocessing_export(file):
+    folder = Path(file).parent
     stem = Path(file).stem
-    s3_base_dir = f"{S3_BASE_BASE_DIR}/{stem}/"
+    s3_base_dir = f"{S3_BASE_BASE_DIR}/{folder}-{stem}/"
     subprocess.run(f"python open_lm/datapreprocess/make_2048.py --input-files {file} --output-dir /scratch/kjablonk/preproc_data --num-workers 30 --num-consumers 8 --s3-base-dir {s3_base_dir} --upload-to-s3", shell=True)
 
 
