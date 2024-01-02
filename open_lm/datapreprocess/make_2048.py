@@ -51,7 +51,7 @@ def write_to_shard(chunks, shard_writer):
 def upload_to_s3_and_remove(fname, s3_base=S3_BASE):
     """Uploads file to s3 and removes it from local file system"""
     fname_split = fname.split("/")
-    s3_path = s3_base + "/"  + fname_split[-2] + "/" + fname_split[-1]
+    s3_path = s3_base.replace('/', '') + "/"  + fname_split[-2].replace('/', '') + "/" + fname_split[-1].replace('/', '')
     cmd = f"aws s3 cp {fname} {s3_path} && rm {fname}"
     print("COMMAND:", cmd)
     os.system(cmd)
