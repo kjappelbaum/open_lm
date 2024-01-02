@@ -7,7 +7,8 @@ import multiprocessing as mp
 from pathlib import Path
 from cloudpathlib import CloudPath
 from tqdm import tqdm
-
+from glob import glob
+from pathlib import Path 
 
 def path_or_cloudpath(s):
     if re.match(r"^\w+://", s):
@@ -51,12 +52,11 @@ def count_samples(shard_path, tmp_dir):
 
 
 def worker_fn(input_data):
-    basename, data_dir, tmp_dir = input_data
-    shard_path = data_dir / basename
+    shard_path, data_dir, tmp_dir = input_data
     return (
-        basename,
+        shard_path.name,
         {
-            "shard": basename.split(".")[0],
+            "shard": shard_path.parts[-2],
             "num_sequences": count_samples(shard_path, tmp_dir),
         },
     )
@@ -65,8 +65,8 @@ def worker_fn(input_data):
 def main(args):
     args = parse_args(args)
 
-    shards = sorted([x for x in args.data_dir.iterdir() if x.name.endswith(".tar")])
-    input_data = [(shard.name, args.data_dir, args.tmp_dir) for shard in shards]
+    shards = sorted([Path(x) for x in glob(str(args.data_dir / "**" / "*.tar")) if Path(x).name.endswith(".tar")])
+    input_data = [(shard, args.data_dir, args.tmp_dir) for shard in shards]
 
     print(f"Shards to process: {len(shards)}")
     print("Creating pool.")
