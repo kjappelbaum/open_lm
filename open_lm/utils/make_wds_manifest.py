@@ -9,6 +9,7 @@ from cloudpathlib import CloudPath
 from tqdm import tqdm
 from glob import glob
 from pathlib import Path 
+from s3path import S3Path
 
 def path_or_cloudpath(s):
     if re.match(r"^\w+://", s):
@@ -40,6 +41,10 @@ def count_samples(shard_path, tmp_dir):
     if isinstance(shard_path, CloudPath):
         temp_shard_path = Path(tmp_dir) / shard_path.name
         shard_path.download_to(temp_shard_path)
+    elif isinstance(shard_path, S3Path):
+        temp_shard_path = Path(tmp_dir) / shard_path.name
+        cloudpath = CloudPath('s3:/'+str(shard_path))
+        cloudpath.download_to(temp_shard_path) 
     else:
         temp_shard_path = shard_path
 
@@ -66,8 +71,12 @@ def worker_fn(input_data):
 
 def main(args):
     args = parse_args(args)
-
-    shards = sorted([Path(x) for x in glob(str(args.data_dir / "**" / "*.tar")) if Path(x).name.endswith(".tar")])
+    
+    if 's3://' in args.data_dir: 
+        bucket_path = S3Path(str(args.data_dir).replace('s3:/', ''))
+        shards = list(bucket_path.glob('**/*.tar'))
+    else:
+        shards = sorted([Path(x) for x in glob(str(args.data_dir / "**" / "*.tar")) if Path(x).name.endswith(".tar")])
     input_data = [(shard, args.data_dir, args.tmp_dir) for shard in shards]
 
     print(f"Shards to process: {len(shards)}")
