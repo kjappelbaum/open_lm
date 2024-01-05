@@ -44,7 +44,6 @@ def count_file(file):
         count = 0
     return count
 
-CWD = os.dirname(__file__.dir)
         
 def count_samples(shard_path):
     if isinstance(shard_path, CloudPath):
