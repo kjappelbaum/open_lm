@@ -39,6 +39,7 @@ def parse_args(args):
 
 def count_samples(shard_path, tmp_dir):
     if isinstance(shard_path, CloudPath):
+        print('Downloading ', shard_path)
         temp_shard_path = Path(tmp_dir) / shard_path.name
         shard_path.download_to(temp_shard_path)
     elif isinstance(shard_path, S3Path):
