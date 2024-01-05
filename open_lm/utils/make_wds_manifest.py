@@ -78,8 +78,9 @@ def main(args):
         for worker_data in tqdm(pool.imap_unordered(worker_fn, input_data)):
             data.append(worker_data)
 
-    data = sorted(data)
     data = [item[1] for item in data]
+    total_sequences = sum([item["num_sequences"] for item in data])
+    print(f"Total sequences: {total_sequences}")
     manifest_path =  args.manifest_filename
     with manifest_path.open("w") as fp:
         for item in data:
