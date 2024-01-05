@@ -82,7 +82,7 @@ def main(args):
     total_sequences = sum([item["num_sequences"] for item in data])
     print(f"Total sequences: {total_sequences}")
     manifest_path =  args.manifest_filename
-    with manifest_path.open("w") as fp:
+    with open(manifest_path, "w") as fp:
         for item in data:
             simdjson.dump(item, fp)
             fp.write("\n")
