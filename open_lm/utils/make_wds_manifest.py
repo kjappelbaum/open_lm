@@ -5,11 +5,11 @@ import sys
 import subprocess
 import multiprocessing as mp
 from pathlib import Path
-from cloudpathlib import CloudPath
+from cloudpathlib import CloudPath, S3Path
 from tqdm import tqdm
 from glob import glob
 from pathlib import Path 
-from s3path import S3Path
+
 
 def path_or_cloudpath(s):
     if re.match(r"^\w+://", s):
