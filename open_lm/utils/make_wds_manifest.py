@@ -56,13 +56,12 @@ def count_samples(shard_path, tmp_dir):
 
 def worker_fn(input_data):
     shard_path, data_dir, tmp_dir = input_data
-    return (
-        {
+    return {
             "manifest_path": str(shard_path),
             "shard": shard_path.parts[-2],
             "num_sequences": count_samples(shard_path, tmp_dir),
         },
-    )
+    
 
 
 def main(args):
