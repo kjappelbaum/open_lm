@@ -72,8 +72,8 @@ def worker_fn(input_data):
 def main(args):
     args = parse_args(args)
     
-    if 's3://' in args.data_dir: 
-        bucket_path = S3Path(str(args.data_dir).replace('s3:/', ''))
+    if isinstance(args.data_dir, S3Path):
+        bucket_path = args.data_dir
         shards = list(bucket_path.glob('**/*.tar'))
     else:
         shards = sorted([Path(x) for x in glob(str(args.data_dir / "**" / "*.tar")) if Path(x).name.endswith(".tar")])
