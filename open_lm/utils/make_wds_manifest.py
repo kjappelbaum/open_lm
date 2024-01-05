@@ -43,8 +43,11 @@ def count_samples(shard_path, tmp_dir):
     else:
         temp_shard_path = shard_path
 
-    count = int(subprocess.check_output(f"tar tf {temp_shard_path} | wc -l", shell=True))
-
+    try:
+        count = int(subprocess.check_output(f"tar tf {temp_shard_path} | wc -l", shell=True))
+    except subprocess.CalledProcessError:
+        count = 0
+        
     if isinstance(shard_path, CloudPath):
         temp_shard_path.unlink()
 
