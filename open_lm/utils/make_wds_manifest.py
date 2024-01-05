@@ -80,7 +80,7 @@ def main(args):
 
     data = sorted(data)
     data = [item[1] for item in data]
-    manifest_path = args.data_dir / args.manifest_filename
+    manifest_path =  args.manifest_filename
     with manifest_path.open("w") as fp:
         for item in data:
             simdjson.dump(item, fp)
