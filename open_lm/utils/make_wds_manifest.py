@@ -60,7 +60,7 @@ def worker_fn(input_data):
             "manifest_path": str(shard_path),
             "shard": shard_path.parts[-2],
             "num_sequences": count_samples(shard_path, tmp_dir),
-        },
+        }
     
 
 
