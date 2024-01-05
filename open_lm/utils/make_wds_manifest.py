@@ -43,7 +43,7 @@ def count_file(file):
         count = 0
     return count
         
-def count_samples(shard_path, tmp_dir):
+def count_samples(shard_path):
     if isinstance(shard_path, CloudPath):
         print('Downloading ', shard_path)
         with tempfile.NamedTemporaryFile('w') as tf:
@@ -53,11 +53,11 @@ def count_samples(shard_path, tmp_dir):
         return count_file(shard_path)
 
 def worker_fn(input_data):
-    shard_path, data_dir, tmp_dir = input_data
+    shard_path, data_dir = input_data
     return {
             "manifest_path": str(shard_path),
             "shard": shard_path.parts[-2],
-            "num_sequences": count_samples(shard_path, tmp_dir),
+            "num_sequences": count_samples(shard_path),
         }
     
 
@@ -70,7 +70,7 @@ def main(args):
         shards = list(bucket_path.glob('**/*.tar'))
     else:
         shards = sorted([Path(x) for x in glob(str(args.data_dir / "**" / "*.tar")) if Path(x).name.endswith(".tar")])
-    input_data = [(shard, args.data_dir, args.tmp_dir) for shard in shards]
+    input_data = [(shard, args.data_dir) for shard in shards]
 
     print(f"Shards to process: {len(shards)}")
     print("Creating pool.")
