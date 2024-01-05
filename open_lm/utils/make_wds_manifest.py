@@ -10,6 +10,7 @@ from tqdm import tqdm
 from glob import glob
 from pathlib import Path 
 import tempfile
+import os 
 
 def path_or_cloudpath(s):
     if re.match(r"^\w+://", s):
@@ -42,11 +43,13 @@ def count_file(file):
     except subprocess.CalledProcessError:
         count = 0
     return count
+
+CWD = os.dirname(__file__.dir)
         
 def count_samples(shard_path):
     if isinstance(shard_path, CloudPath):
         print('Downloading ', shard_path)
-        with tempfile.TemporaryDirectory() as tempdir:
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as tempdir:
             tmpfile = Path(tempdir) / 'archive.tar'
             shard_path.download_to(tmpfile)
             return count_file(tmpfile)
