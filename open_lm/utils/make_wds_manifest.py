@@ -9,7 +9,7 @@ from cloudpathlib import CloudPath, S3Path
 from tqdm import tqdm
 from glob import glob
 from pathlib import Path 
-
+import tempfile
 
 def path_or_cloudpath(s):
     if re.match(r"^\w+://", s):
@@ -31,34 +31,26 @@ def parse_args(args):
         default="manifest.jsonl",
         help="Filename for the manifest that will be stored in the webdataset directory.",
     )
-    parser.add_argument("--tmp-dir", type=str, default=None, help="Temporary directory.")
     parser.add_argument("--num-workers", type=int, default=2, help="Number of workers.")
     args = parser.parse_args(args)
     return args
 
 
+def count_file(file):
+    try:
+        count = int(subprocess.check_output(f"tar tf {file} | wc -l", shell=True))
+    except subprocess.CalledProcessError:
+        count = 0
+    return count
+        
 def count_samples(shard_path, tmp_dir):
     if isinstance(shard_path, CloudPath):
         print('Downloading ', shard_path)
-        temp_shard_path = Path(tmp_dir) / shard_path.name
-        shard_path.download_to(temp_shard_path)
-    elif isinstance(shard_path, S3Path):
-        temp_shard_path = Path(tmp_dir) / shard_path.name
-        cloudpath = CloudPath('s3:/'+str(shard_path))
-        cloudpath.download_to(temp_shard_path) 
+        with tempfile.NamedTemporaryFile('w') as tf:
+            shard_path.download_to(tf.name)
+            return count_file(tf.name)
     else:
-        temp_shard_path = shard_path
-
-    try:
-        count = int(subprocess.check_output(f"tar tf {temp_shard_path} | wc -l", shell=True))
-    except subprocess.CalledProcessError:
-        count = 0
-        
-    if isinstance(shard_path, CloudPath):
-        temp_shard_path.unlink()
-
-    return count
-
+        return count_file(shard_path)
 
 def worker_fn(input_data):
     shard_path, data_dir, tmp_dir = input_data
