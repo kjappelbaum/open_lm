@@ -46,7 +46,7 @@ def count_file(file):
 def count_samples(shard_path):
     if isinstance(shard_path, CloudPath):
         print('Downloading ', shard_path)
-        with tempfile.NamedTemporaryFile('w') as tf:
+        with tempfile.NamedTemporaryFile(suffix='.tar') as tf:
             shard_path.download_to(tf.name)
             return count_file(tf.name)
     else:
