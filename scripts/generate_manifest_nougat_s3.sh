@@ -1,0 +1,9 @@
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_bioxriv_test --manifest-filename nougat_bioxriv_test_manifest_s3.jsonl
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_bioxriv_train --manifest-filename nougat_bioxriv_train_manifest_s3.jsonl
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_bioxriv_valid --manifest-filename nougat_bioxriv_valid_manifest_s3.jsonl
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_chemrxiv_test --manifest-filename nougat_chemrxiv_test_manifest_s3.jsonl
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_chemrxiv_train --manifest-filename nougat_chemrxiv_train_manifest_s3.jsonl
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_chemrxiv_valid --manifest-filename nougat_chemrxiv_valid_manifest_s3.jsonl
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_medrxiv_test --manifest-filename nougat_medrxiv_test_manifest_s3.jsonl
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_medrxiv_train --manifest-filename nougat_medrxiv_train_manifest_s3.jsonl
+python open_lm/utils/make_wds_manifest.py --data-dir s3://llched-raw/open_lm_run_processed_data/nougat_process/nougat_medrxiv_valid --manifest-filename nougat_medrxiv_valid_manifest_s3.jsonl
