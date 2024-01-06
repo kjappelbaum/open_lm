@@ -14,7 +14,8 @@ def upload_to_s3(manifest_file):
                 parts = Path(data['manifest_path']).parts
                 worker = parts[-2]
                 shard = parts[-1]
-                s3.upload_file(data['manifest_path'], 'llched-raw', 'open_lm_run_processed_data/nougat_process/' +  worker + '/' + shard) 
+                folder_name = parts[-4]
+                s3.upload_file(data['manifest_path'], 'llched-raw', 'open_lm_run_processed_data/nougat_process/' + folder_name + '/' +  worker + '/' + shard) 
 
 if __name__ == '__main__':
     fire.Fire(upload_to_s3)
