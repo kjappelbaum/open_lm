@@ -132,7 +132,6 @@ def save_step_checkpoint(
     optimizer,
     scaler,
     completed_epoch,
-    evaluation_metrics,
     step,
     samples_seen=None,
 ):
@@ -148,7 +147,6 @@ def save_step_checkpoint(
             "step": step if step else 0,
             "name": args.name,
             "state_dict": cpu_state if args.fsdp else model.state_dict(),
-            "evaluation_metrics": evaluation_metrics,
         }
 
         if samples_seen is not None:
@@ -162,7 +160,6 @@ def save_step_checkpoint(
             "step": step if step else 0,
             "name": args.name,
             "optimizer": optim_state if args.fsdp else optimizer.state_dict(),
-            "evaluation_metrics": evaluation_metrics,
         }
 
         if scaler is not None:
@@ -172,7 +169,6 @@ def save_step_checkpoint(
             "epoch": completed_epoch,
             "step": step if step else 0,
             "name": args.name,
-            "evaluation_metrics": evaluation_metrics,
         }
 
         prefixes = {
