@@ -40,7 +40,8 @@ def parse_args(args):
 def count_file(file):
     try:
         count = int(subprocess.check_output(f"tar tf {file} | wc -l", shell=True))
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        print(f'Failed for {file} due to {e}')
         count = 0
     return count
 
@@ -83,7 +84,7 @@ def main(args):
             data.append(worker_data)
 
     total_sequences = sum([item["num_sequences"] for item in data])
-    print(f"Total sequences: {total_sequences}")
+    print(f"Total sequences in {args.data_dir}: {total_sequences}")
     manifest_path =  args.manifest_filename
     with open(manifest_path, "w") as fp:
         for item in data:

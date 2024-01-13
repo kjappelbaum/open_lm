@@ -4,13 +4,17 @@ import math
 import time
 from contextlib import nullcontext
 import copy
-
+import os
 import numpy as np
 import torch
 import torch.distributed as dist
 from torch.distributed.distributed_c10d import ReduceOp
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
-
+from torch.distributed.fsdp import (
+    FullyShardedDataParallel as FSDP,
+    FullStateDictConfig,
+    StateDictType,
+)
 
 try:
     from megablocks.layers.moe import batched_load_balancing_loss, clear_load_balancing_loss
@@ -120,6 +124,78 @@ def replace_tok(tensor, tok, replaced):
     out[out == tok] = replaced
 
     return out
+
+
+def save_step_checkpoint(
+    args,
+    model,
+    optimizer,
+    scaler,
+    completed_epoch,
+    evaluation_metrics,
+    step,
+    samples_seen=None,
+):
+    cpu_state, optim_state = None, None
+    if args.logs and args.logs.lower() != "none" and args.fsdp:
+        save_policy = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
+        with FSDP.state_dict_type(model, StateDictType.FULL_STATE_DICT, save_policy):
+            cpu_state = model.state_dict()
+            optim_state = FSDP.optim_state_dict(model, optimizer)
+    if args.save_logs:
+        checkpoint_dict_model = {
+            "epoch": completed_epoch,
+            "step": step if step else 0,
+            "name": args.name,
+            "state_dict": cpu_state if args.fsdp else model.state_dict(),
+            "evaluation_metrics": evaluation_metrics,
+        }
+
+        if samples_seen is not None:
+            checkpoint_dict_model["samples_seen"] = samples_seen
+
+        if step is not None:
+            checkpoint_dict_model["step"] = step
+
+        checkpoint_dict_opt = {
+            "epoch": completed_epoch,
+            "step": step if step else 0,
+            "name": args.name,
+            "optimizer": optim_state if args.fsdp else optimizer.state_dict(),
+            "evaluation_metrics": evaluation_metrics,
+        }
+
+        if scaler is not None:
+            checkpoint_dict_opt["scaler"] = scaler.state_dict()
+
+        checkpoint_dict_stats = {
+            "epoch": completed_epoch,
+            "step": step if step else 0,
+            "name": args.name,
+            "evaluation_metrics": evaluation_metrics,
+        }
+
+        prefixes = {
+            "epoch_": checkpoint_dict_model,
+            "optimizer_": checkpoint_dict_opt,
+            "stats_": checkpoint_dict_stats,
+        }
+
+        if args.step_save_frequency > 0 and (step % args.step_save_frequency) == 0:
+            for prefix in prefixes:
+                path = os.path.join(args.checkpoint_path, f"{prefix}{completed_epoch}_{step}.pt")
+                print(f"Saving {prefix}{completed_epoch}_{step} in {path}...")
+                torch.save(
+                    prefixes[prefix],
+                    path,
+                )
+
+        if args.delete_previous_checkpoint:
+            previous_step = step - args.step_save_frequency
+            for prefix in prefixes:
+                prev = os.path.join(args.checkpoint_path, f"{prefix}{completed_epoch}_{previous_step}.pt")
+                if os.path.exists(prev):
+                    os.remove(prev)
 
 
 def sample_chunk(chunk, args):
@@ -364,7 +440,15 @@ def train_one_epoch(model, data, loss, epoch, step, optimizer, scaler, scheduler
                 # e.g., saving checkpoints and optmization states that may lead to skipped
                 # training on restarts.
                 return False, step
-
+        save_step_checkpoint(
+            args,
+            model,
+            optimizer,
+            scaler,
+            epoch,
+            step=step,
+            samples_seen=(step + 1) * args.global_batch_size * args.seq_len,
+        )
     # end for
     if tb_writer is not None:
         tb_writer.flush()

@@ -353,6 +353,9 @@ def parse_args(args):
     )
     parser.add_argument("--save-frequency", type=int, default=1, help="How often to save checkpoints.")
     parser.add_argument(
+        "--step-save-frequency", type=int, default=10_000, help="How often to save checkpoints in steps."
+    )
+    parser.add_argument(
         "--save-most-recent",
         action="store_true",
         default=False,
