@@ -133,6 +133,7 @@ def save_step_checkpoint(
     scaler,
     completed_epoch,
     step,
+    batch_count=None,
     samples_seen=None,
 ):
     cpu_state, optim_state = None, None
@@ -145,6 +146,7 @@ def save_step_checkpoint(
         checkpoint_dict_model = {
             "epoch": completed_epoch,
             "step": step if step else 0,
+            "batch_count": batch_count if batch_count else 0,
             "name": args.name,
             "state_dict": cpu_state if args.fsdp else model.state_dict(),
         }
@@ -159,6 +161,7 @@ def save_step_checkpoint(
             "epoch": completed_epoch,
             "step": step if step else 0,
             "name": args.name,
+            "batch_count": batch_count if batch_count else 0,
             "optimizer": optim_state if args.fsdp else optimizer.state_dict(),
         }
 
@@ -168,6 +171,7 @@ def save_step_checkpoint(
         checkpoint_dict_stats = {
             "epoch": completed_epoch,
             "step": step if step else 0,
+            "batch_count": batch_count if batch_count else 0,
             "name": args.name,
         }
 
@@ -214,7 +218,9 @@ def sample_chunk(chunk, args):
     return inputs, targets
 
 
-def train_one_epoch(model, data, loss, epoch, step, optimizer, scaler, scheduler, total_steps, args, tb_writer=None):
+def train_one_epoch(
+    model, data, loss, epoch, step, batch_count, optimizer, scaler, scheduler, total_steps, args, tb_writer=None
+):
     """Trains model for one epoch on the provided data.
 
     Returns:
@@ -242,7 +248,6 @@ def train_one_epoch(model, data, loss, epoch, step, optimizer, scaler, scheduler
     logit_m = AverageMeter()
 
     end = time.time()
-
     data_iterator = iter(dataloader)
 
     if args.moe_freq > 0:
@@ -443,6 +448,7 @@ def train_one_epoch(model, data, loss, epoch, step, optimizer, scaler, scheduler
             scaler,
             epoch,
             step=step,
+            batch_count=batch_count,
             samples_seen=(step + 1) * args.global_batch_size * args.seq_len,
         )
     # end for

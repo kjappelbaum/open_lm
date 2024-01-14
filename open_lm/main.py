@@ -106,6 +106,7 @@ def load_model(args, model):
         start_epoch = checkpoint["epoch"]
         sd = checkpoint["state_dict"]
         global_step = checkpoint.get("step", None)
+        batch_count = checkpoint.get("batch_count", None)
         if next(iter(sd.items()))[0].startswith("module"):
             sd = {k[len("module.") :]: v for k, v in sd.items()}
         if args.fsdp:
@@ -117,10 +118,10 @@ def load_model(args, model):
         logging.info(f"=> resuming checkpoint '{args.resume}' (epoch {start_epoch})")
     else:
         # loading a bare (model only) checkpoint for fine-tune or evaluation
-        start_epoch, global_step = 0, 0
+        start_epoch, global_step, batch_count = 0, 0, 0
         model.load_state_dict(checkpoint)
         logging.info(f"=> loaded checkpoint '{args.resume}' (epoch {start_epoch})")
-    return start_epoch, global_step
+    return start_epoch, global_step, batch_count
 
 
 def load_optimizer(args, model, optimizer, scaler):
@@ -542,13 +543,13 @@ def main(args):
                 f.write(f"{name}: {val}\n")
 
     # optionally resume model from a checkpoint
-    start_epoch, global_step = 0, 0
+    start_epoch, global_step, batch_count = 0, 0, 0
     if args.resume is not None:
-        start_epoch, global_step = load_model(args, model)
+        start_epoch, global_step, batch_count = load_model(args, model)
     elif args.pretrained is not None:
         print("=> loading from a pre-trained model.")
         args.resume = args.pretrained
-        _epoch, _step = load_model(args, model)
+        _epoch, _step, _batch_count = load_model(args, model)
         # this flag continues training from the pre-trained model.
         if args.load_pretrained_state:
             start_epoch, global_step = _epoch, _step
@@ -745,6 +746,7 @@ def main(args):
             loss,
             epoch=epoch,
             step=global_step,
+            batch_count=batch_count,
             optimizer=optimizer,
             scaler=scaler,
             scheduler=scheduler,
