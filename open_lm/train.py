@@ -265,7 +265,7 @@ def train_one_epoch(
             fp16=False,
             bf16=False,
         )
-
+    batch_count_start = batch_count
     for i in itertools.count():
         if not args.skip_scheduler:
             scheduler(step)
@@ -376,7 +376,7 @@ def train_one_epoch(
         if args.world_size > 1:
             dist.all_reduce(global_loss_tensor, op=ReduceOp.AVG)
 
-        batch_count = i + 1
+        batch_count = i + 1 + batch_count_start
         step += 1
 
         if is_master(args) and (
