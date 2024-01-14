@@ -353,9 +353,6 @@ def parse_args(args):
     )
     parser.add_argument("--save-frequency", type=int, default=1, help="How often to save checkpoints.")
     parser.add_argument(
-        "--step-save-frequency", type=int, default=10_000, help="How often to save checkpoints in steps."
-    )
-    parser.add_argument(
         "--save-most-recent",
         action="store_true",
         default=False,
@@ -647,6 +644,18 @@ def parse_args(args):
         "--force-distributed",
         action="store_true",
         help="Allow forcing distributed mode even when running on one gpu. Mostly useful for testing.",
+    )
+    parser.add_argument(
+        "--checkpoint-data",
+        action="store_true",
+        default=False,
+        help="Save the data loaders in the checkpoint. This can be useful for restart",
+    )
+    parser.add_argument(
+        "--load-checkpoint-data",
+        action="store_true",
+        default=False,
+        help="Load the data loaders from the checkpoint. This can be useful for restart",
     )
 
     add_model_args(parser)

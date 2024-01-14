@@ -126,78 +126,6 @@ def replace_tok(tensor, tok, replaced):
     return out
 
 
-def save_step_checkpoint(
-    args,
-    model,
-    optimizer,
-    scaler,
-    completed_epoch,
-    step,
-    batch_count=None,
-    samples_seen=None,
-):
-    cpu_state, optim_state = None, None
-    if args.logs and args.logs.lower() != "none" and args.fsdp:
-        save_policy = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
-        with FSDP.state_dict_type(model, StateDictType.FULL_STATE_DICT, save_policy):
-            cpu_state = model.state_dict()
-            optim_state = FSDP.optim_state_dict(model, optimizer)
-    if args.save_logs:
-        checkpoint_dict_model = {
-            "epoch": completed_epoch,
-            "step": step if step else 0,
-            "batch_count": batch_count if batch_count else 0,
-            "name": args.name,
-            "state_dict": cpu_state if args.fsdp else model.state_dict(),
-        }
-
-        if samples_seen is not None:
-            checkpoint_dict_model["samples_seen"] = samples_seen
-
-        if step is not None:
-            checkpoint_dict_model["step"] = step
-
-        checkpoint_dict_opt = {
-            "epoch": completed_epoch,
-            "step": step if step else 0,
-            "name": args.name,
-            "batch_count": batch_count if batch_count else 0,
-            "optimizer": optim_state if args.fsdp else optimizer.state_dict(),
-        }
-
-        if scaler is not None:
-            checkpoint_dict_opt["scaler"] = scaler.state_dict()
-
-        checkpoint_dict_stats = {
-            "epoch": completed_epoch,
-            "step": step if step else 0,
-            "batch_count": batch_count if batch_count else 0,
-            "name": args.name,
-        }
-
-        prefixes = {
-            "epoch_": checkpoint_dict_model,
-            "optimizer_": checkpoint_dict_opt,
-            "stats_": checkpoint_dict_stats,
-        }
-
-        if args.step_save_frequency > 0 and (step % args.step_save_frequency) == 0:
-            for prefix in prefixes:
-                path = os.path.join(args.checkpoint_path, f"{prefix}{completed_epoch}_{step}.pt")
-                print(f"Saving {prefix}{completed_epoch}_{step} in {path}...")
-                torch.save(
-                    prefixes[prefix],
-                    path,
-                )
-
-        if args.delete_previous_checkpoint:
-            previous_step = step - args.step_save_frequency
-            for prefix in prefixes:
-                prev = os.path.join(args.checkpoint_path, f"{prefix}{completed_epoch}_{previous_step}.pt")
-                if os.path.exists(prev):
-                    os.remove(prev)
-
-
 def sample_chunk(chunk, args):
     if chunk.shape[1] == args.seq_len + 1:
         start_idx = 0
@@ -441,16 +369,7 @@ def train_one_epoch(
                 # e.g., saving checkpoints and optmization states that may lead to skipped
                 # training on restarts.
                 return False, step
-        save_step_checkpoint(
-            args,
-            model,
-            optimizer,
-            scaler,
-            epoch,
-            step=step,
-            batch_count=batch_count,
-            samples_seen=(step + 1) * args.global_batch_size * args.seq_len,
-        )
+
     # end for
     if tb_writer is not None:
         tb_writer.flush()
